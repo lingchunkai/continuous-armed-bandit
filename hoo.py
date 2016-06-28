@@ -48,7 +48,7 @@ class Hoo:
             curNode = nextNode
 
         # Play arm and get reward
-        pulled =  random.uniform(curNode.rng[0,0], curNode.rng[0,1])
+        pulled =  np.array([random.uniform(curNode.rng[x,0], curNode.rng[x,1]) for x in xrange(D)])
         reward = self.fun(pulled)
         print curNode.rng
         print pulled, reward
@@ -111,12 +111,15 @@ class Node:
         return nextNode
         
 def basic_params():
+    """
+    Example in Fig 2 of [1]
+    """
     a = 2.0 # square error norm
     D = 1 # 
     p = 2.0**(-a/D)
     b = 1.0
     v1 = b * (2 * math.sqrt(D)) ** a 
-    objfun = lambda x: (1.0/2.0) * (math.sin(13*x)*math.sin(27*x)+1)
+    objfun = lambda x: float((1.0/2.0) * (np.sin(13.0*x)*np.sin(27.0*x)+1))
     noise = lambda : np.random.binomial(1,0.5)
     fullfun = lambda x: objfun(x) * noise()
     xMaxEReward=0.867526/2.0
@@ -124,14 +127,30 @@ def basic_params():
     
     return a,D,p,b,v1,fullfun, xMaxEReward, xMax
 
+def advanced_params():
+    """
+    "Bullseye" reward in [0,1]^2, centered at (.5, .5)
+    """
+    
+    a = 2.0
+    D = 2
+    p = 2.0**(-a/D)
+    b = 1.0
+    v1 = b * (2 * math.sqrt(D)) ** a
+    objfun = lambda x: math.exp(-0.5 * (np.linalg.norm(x - np.array([0.5, 0.5]))/0.5)** 2)
+    noise = lambda : np.random.binomial(1, 0.5)
+    fullfun = lambda x: objfun(x) * noise()
+    xMaxEReward = 0.5
+    xMax = [0.5, 0.5]
+    
+    return a,D,p,b,v1,fullfun, xMaxEReward, xMax
 
 
 if __name__ == '__main__': 
 
-    [a,D,p,b,v1,fullfun, xMaxEReward, xMax] = basic_params()
+    # [a,D,p,b,v1,fullfun, xMaxEReward, xMax] = basic_params()
+    [a,D,p,b,v1,fullfun, xMaxEReward, xMax] = advanced_params()
 
-    #plt.plot(np.arange(0,1,0.01), [fun(x) for x in np.arange(0,1,0.01)])
-    #plt.show()
     h = Hoo(D, v1, p, fullfun)
     arms_pulled = []
     rewards_recieved = []
