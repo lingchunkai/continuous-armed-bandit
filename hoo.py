@@ -29,7 +29,6 @@ class Hoo:
         self.fun = fun
         self.root = Node(np.tile([0.0,1.0],[D,1]), None, h=0,nextCut=0)
         self.n = 0
-        self.noise = noise
 
     def Pull(self):
         """ Pull arm
@@ -133,7 +132,7 @@ if __name__ == '__main__':
 
     #plt.plot(np.arange(0,1,0.01), [fun(x) for x in np.arange(0,1,0.01)])
     #plt.show()
-    h = Hoo(D, v1, p, fun, noise)
+    h = Hoo(D, v1, p, fullfun)
     arms_pulled = []
     rewards_recieved = []
     average_regret = []
