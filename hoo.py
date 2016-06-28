@@ -17,7 +17,7 @@ class Hoo:
     Assume that search space is in to D-dimensional hypercube [0,1]^D
     Refer to Example 1 of [1] for details about the parameter selection and tree-splitting
     """
-    def __init__(self, D, v1, p, fun, noise):
+    def __init__(self, D, v1, p, fun):
         """ Constructs Hoo empty search tree 
         @param D - dimension of hypercube
         @param v1 - tunable parameters --> will affect regret bounds (if it even converges to 0!) 
@@ -50,7 +50,7 @@ class Hoo:
 
         # Play arm and get reward
         pulled =  random.uniform(curNode.rng[0,0], curNode.rng[0,1])
-        reward = self.fun(pulled) * self.noise()
+        reward = self.fun(pulled)
         print curNode.rng
         print pulled, reward
         
@@ -111,18 +111,26 @@ class Node:
         self.children[pos] = nextNode
         return nextNode
         
-        
-    
-if __name__ == '__main__': 
+def basic_params():
     a = 2.0 # square error norm
     D = 1 # 
     p = 2.0**(-a/D)
     b = 1.0
     v1 = b * (2 * math.sqrt(D)) ** a 
-    fun = lambda x: (1.0/2.0) * (math.sin(13*x)*math.sin(27*x)+1)
+    objfun = lambda x: (1.0/2.0) * (math.sin(13*x)*math.sin(27*x)+1)
     noise = lambda : np.random.binomial(1,0.5)
-    xMaxPos=0.867526
+    fullfun = lambda x: objfun(x) * noise()
+    xMaxEReward=0.867526/2.0
     xMax=0.975599
+    
+    return a,D,p,b,v1,fullfun, xMaxEReward, xMax
+
+
+
+if __name__ == '__main__': 
+
+    [a,D,p,b,v1,fullfun, xMaxEReward, xMax] = basic_params()
+
     #plt.plot(np.arange(0,1,0.01), [fun(x) for x in np.arange(0,1,0.01)])
     #plt.show()
     h = Hoo(D, v1, p, fun, noise)
@@ -132,7 +140,7 @@ if __name__ == '__main__':
     for k in xrange(5000):
         pulled, reward = h.Pull()
         arms_pulled.append(pulled)
-        regret = xMax/2-reward
+        regret = xMaxEReward-reward
         if k == 0: average_regret.append(regret)
         else: average_regret.append((average_regret[-1] * (k-1) + regret)/k)
     plt.plot(average_regret)
